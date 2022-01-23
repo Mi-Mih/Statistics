@@ -1,32 +1,19 @@
 program programm1;
 const n : integer =4;
 const k : integer =5;
-const t_upr : real =5.6;
+const t_upr : real =1;
 
 var
    {Массивы координата(время), учитывай k - количество точек и n кол-во измерений}
-   time,x: array [0..5] of real;
-   diff_x_arr,x_predict_arr : array [0..4] of real;
+   time,x: array [0..5] of real;{k}
+   diff_x_arr,x_predict_arr,x_exact_arr : array [0..4] of real; {n}
    i,j,v: integer;
    eps,difference_x, disperssion_x,suma:real;
 
    {массив, содержащий 2 коэффа b_0 и b_1}
    solution:array [0..1] of real;
 
-   {нормальный датчик (0,1) }
-                 Function DAHOP: real;
-                   Var
-                     i    : byte;
-                     a,aa : real;
-                       begin
-                         a:=0;
-                         for i:=1 to 12 do
-                           begin
-                             aa:=random;
-                             a:=a+aa;
-                           end;
-                         Dahop:=(a-6)/0.6745;
-                       end; {function DAHOR}
+  
 {------------------------------------------------------------power        --}
 
             Function power (os: real; st: integer):real;
@@ -52,7 +39,13 @@ Function Powd(a,b: real): real;
                             if b = 0 then powd:=1
                             else powd:=0;
                       end;   {Powd}
-
+ {нормальный датчик (0,1) }
+                 Function DAHOP: real;
+                   var
+                   ra:real;
+                   begin
+                   ra:=exp((-1/2)*(power(random,2)))/sqrt(2*pi);
+                   end;
 {фунция МНК, прямая}
 function MNK(var coord,time,solution: array of real): boolean;
       var
@@ -99,48 +92,49 @@ Function x_exact(t: real): real;
             result: real;
             {зависимость координаты от времени- прямая.}
                       begin
-                        result:=2.5+4.5*t;
+                        result:=25+45*t;
                       end;
 Function x_predict(b_0,b_1,x_p:real):real;
          var 
          pred:real;
          begin
-         pred:=b_0*x_p+b_1;
+         pred:=b_0+b_1*x_p;
          end;
 {Головная программа!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}
 {пока просто наполняем массивы координаты и времени}
 begin
-suma:=0;
-disperssion_x:=0;
-for j:=1 to n do
-begin {цикл по ошибке}
-eps:=j*1.0;
-for i:=0 to k do
-begin  {цикл по точке}
-{вид функции можно ввести здесь}
-       x[i]:=x_exact(i)+DAHOP*eps;
-       time[i]:=i;
-end;   {цикл по точке}
+for i:=0 to n do
+begin
+eps:=DAHOP;
+for j:=0 to k do
+begin
+x[j]:=x_exact(j)+eps;
+time[j]:=j;
+end;
 MNK(x,time,solution);
 {writeln('y=',solution[0],'+',solution[1],'*x');}
-difference_x:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
-diff_x_arr[j]:=difference_x;
-x_predict_arr[j]:=x_predict(solution[0],solution[1],k+t_upr);
-end; {цикл по ошибке}
 
-for v:=0 to n do{цикл для среднего}
-begin {среднее значение для расчёта дисперсии}
-suma:=suma+x_predict_arr[v];
-end;{цикл для среднего}
-suma:=suma/n;
+diff_x_arr[i]:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
+x_predict_arr[i]:=x_predict(solution[0],solution[1],k+t_upr);
+x_exact_arr[i]:=x_exact(k+t_upr);
+end;
+suma:=0;
+disperssion_x:=0;
+   for v:=0 to n Do{цикл для среднего}
+   begin
+    suma:=suma+x_predict_arr[v];
+     end;
+suma:=suma/(n+1);{среднее}
+
 for v:=0 to n do{цикл для дисперсии}
 begin
-disperssion_x:=disperssion_x+power(x_predict_arr[v]-suma,2)/(n-1);
-writeln(disperssion_x);
-
+disperssion_x:=disperssion_x+power(x_predict_arr[v]-suma,1);
 end;{цикл для дисперсии}
-
+disperssion_x:=disperssion_x/(length(x_predict_arr));
 writeln(disperssion_x);
-readln();
+
+{err(t_upr)
+    err(k)
+}
 end.
 
