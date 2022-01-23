@@ -1,15 +1,19 @@
 program programm1;
 const n : integer =4;
 const k : integer =5;
-const t_upr : real =1;
+
 
 var
    {Массивы координата(время), учитывай k - количество точек и n кол-во измерений}
+   f:text;
    time,x: array [0..5] of real;{k}
-   diff_x_arr,x_predict_arr,x_exact_arr : array [0..4] of real; {n}
+   diff_x_arr,x_predict_arr,x_exact_arr, diff_x_arr_upr : array [0..4] of real; {n}
    i,j,v: integer;
-   eps,difference_x, disperssion_x,suma:real;
-
+   eps,difference_x, disperssion_x,suma, t_upr, help:real;
+   t_upr_arr:array [0..10] of real;
+   {для построения графика ошибки от числа засечек}
+   x_zas: array of real;
+   t_zas: array of real;
    {массив, содержащий 2 коэффа b_0 и b_1}
    solution:array [0..1] of real;
 
@@ -40,12 +44,26 @@ Function Powd(a,b: real): real;
                             else powd:=0;
                       end;   {Powd}
  {нормальный датчик (0,1) }
-                 Function DAHOP: real;
+                 Function DAHOP(): real;
+                     {   Var
+                     i    : byte;
+                     a,aa : real;
+                       begin
+                         a:=0;
+                         for i:=1 to 12 do
+                           begin
+                             aa:=random;
+                             a:=a+aa;
+                           end;
+                         Dahop:=(a-6)/0.6745;
+                       end; {function DAHOR} }
+
                    var
                    ra:real;
                    begin
                    ra:=exp((-1/2)*(power(random,2)))/sqrt(2*pi);
                    end;
+
 {фунция МНК, прямая}
 function MNK(var coord,time,solution: array of real): boolean;
       var
@@ -88,8 +106,7 @@ function MNK(var coord,time,solution: array of real): boolean;
       solution[1]:=b_1;
 end;
 Function x_exact(t: real): real;
-            var 
-            result: real;
+
             {зависимость координаты от времени- прямая.}
                       begin
                         result:=25+45*t;
@@ -100,12 +117,14 @@ Function x_predict(b_0,b_1,x_p:real):real;
          begin
          pred:=b_0+b_1*x_p;
          end;
+
 {Головная программа!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!}
 {пока просто наполняем массивы координаты и времени}
 begin
+t_upr:=1;
 for i:=0 to n do
 begin
-eps:=DAHOP;
+eps:=DAHOP();
 for j:=0 to k do
 begin
 x[j]:=x_exact(j)+eps;
@@ -113,9 +132,11 @@ time[j]:=j;
 end;
 MNK(x,time,solution);
 {writeln('y=',solution[0],'+',solution[1],'*x');}
-
+ {массив ошибок}
 diff_x_arr[i]:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
+{массив предиктов}
 x_predict_arr[i]:=x_predict(solution[0],solution[1],k+t_upr);
+{массив точных решений}
 x_exact_arr[i]:=x_exact(k+t_upr);
 end;
 suma:=0;
@@ -126,15 +147,45 @@ disperssion_x:=0;
      end;
 suma:=suma/(n+1);{среднее}
 
-for v:=0 to n do{цикл для дисперсии}
+for v:=0 to n do{цикл для sum(dx/n)}
 begin
 disperssion_x:=disperssion_x+power(x_predict_arr[v]-suma,1);
-end;{цикл для дисперсии}
+end;{цикл для sum(dx/n)}
 disperssion_x:=disperssion_x/(length(x_predict_arr));
-writeln(disperssion_x);
 
-{err(t_upr)
-    err(k)
-}
-end.
 
+{Запись значений ошибки в файл csv}
+assign(f,'data.csv');
+rewrite(f);
+writeln(f,'Ошибка от возмущения');
+for i:=0 to length(diff_x_arr) do
+begin
+writeln(f, diff_x_arr[i]);
+end;
+
+
+{зависимость ошибки от t_upr}
+{assign(f,'data.csv'); }
+help:=DAHOP();
+writeln(f,'ошибка от упредительного времени', help);
+
+for j:=0 to k do
+begin
+x[j]:=x_exact(j)+help;
+time[j]:=j;
+end;
+for i:=0 to length(t_upr_arr) do
+      begin
+         t_upr:=t_upr+i;
+         t_upr_arr[i]:=t_upr;
+         MNK(x,time,solution);
+       {writeln('y=',solution[0],'+',solution[1],'*x');}
+ {массив ошибок}
+diff_x_arr_upr[i]:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
+
+writeln(f, diff_x_arr_upr[i], t_upr);
+end;
+
+writeln(f,'ошибка от числа засечек', help);
+close(f);
+end.   
