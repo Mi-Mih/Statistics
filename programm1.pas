@@ -1,19 +1,15 @@
 program matstat;
 
-const n   =10;
-const k   =9;
-
 var
-   {Массивы координата(время), учитывай k - количество точек и n кол-во измерений}
-   time,x: array [0..k] of real; {k}
-   eps, t_upr:real;
-   err_norm, t_upr_arr, err_upr:array [0..n] of real; {n}
-   i,j:integer;
-   x_zas, time_zas,err_num: array[0..100-2] of real;
+    err_arr: array[0..15-3] of real;
+    dt_arr:array[0..10-3] of real;
+    eps, t_upr,dt:real;
+
+   i,n:integer;
+
    f:text;
-   {массив, содержащий 2 коэффа b_0 и b_1}
-   solution:array [0..1] of real;
-   
+
+
 Function power (os: real; st: integer):real;
             {Возведение вещественного числа   в  целочисленную  степень.}
                      begin
@@ -24,7 +20,7 @@ Function power (os: real; st: integer):real;
                             power:=os*power(os,st-1)
                          else
                             power:=1;
-                     end; {функции power} 
+                     end; {функции power}
  Function Powd(a,b: real): real;
             {Возведение вещественного числа  в вещественную степень.}
                       begin
@@ -98,85 +94,104 @@ function MNK(var coord,time,solution: array of real): boolean;
       solution[0]:=b_0;
       solution[1]:=b_1;
 end;
-Function x_exact(t: real): real;
-                      begin
-                        result:=20+45*t;
-                      end;
-Function x_predict(b_0,b_1,x_p:real):real;
-          var
-             pred:real;
-         begin
-         pred:=b_0+b_1*x_p;
-         end;
 
+
+Function calc_err(t_upr,E,dt:real; n:integer):real; {функция расчёта ошибки}
+var
+   coord, time: array of real;
+   i: integer;
+   solution:array [0..1] of real;
+   err:real;
 
 begin
+  setlength(coord,n+2);
+  setlength(time,n+2);
+ for i:=0 to n do
+ begin
+     time[i]:=i*dt;
+
+     coord[i]:=20+45*time[i]+E;
+
+     end;
+    MNK(coord,time,solution);
+    err:=abs(20+45*(n*dt+t_upr)-(solution[0]+solution[1]*(n*dt+t_upr)));
+end;{функция расчёта ошибки}
+
+begin {Главная часть программы}
+{Запись в файл}
 assign(f,'data.csv');
 rewrite(f);
-writeln(f,'Ошибка от возмущения');
+{Запись в файл}
 
-{Ошибка от возмущения}
-t_upr:=1;
-for i:=0 to n do
-begin
+{График 1}
+writeln(f,'t_upr');
+for i:=0 to 10 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_t_upr');
 eps:=DAHOP();
-for j:=0 to k do
-begin
-x[j]:=x_exact(j)+eps;
-time[j]:=j;
-end;
-MNK(x,time,solution);
-{writeln('y=',solution[0],'+',solution[1],'*x');}
-err_norm[i]:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
+n:=10;
+dt:=1.0;
+for i:=0 to 10 do
+    begin
+        writeln(f,calc_err(i,eps,dt, n));
+    end;
+{График 1}
 
-writeln(f,err_norm[i]);
-end;
-
-writeln(f,'время упреждения');
-{Ошибка от время упреждения }
+{График 2}
+writeln(f,'n');
+for i:=3 to 15 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_n');
 eps:=DAHOP();
-t_upr:=1;
-for j:=0 to k do
-begin
-x[j]:=x_exact(j)+eps;
-time[j]:=j;
-end;
-for i:=0 to n do
-      begin
-         t_upr:=t_upr+i;
-         t_upr_arr[i]:=t_upr;
-         MNK(x,time,solution);
-err_upr[i]:=abs(x_exact(k+t_upr)-x_predict(solution[0],solution[1],k+t_upr));
-writeln(f, t_upr_arr[i]);
-end;
-writeln(f,'Ошибка от время упреждения при eps=', eps);
-for i:=0 to n do
-begin
-writeln(f,err_upr[i]);
-end;
+t_upr:=10;
+dt:=1;
+for i:=3 to 15 do
+    begin
+        writeln(f,calc_err(t_upr,eps,(10-0)/i,i));
+    end;
+{График 2}
 
+{График 3}
+n:=10;
+t_upr:=10;
+dt:=1;
+writeln(f,'eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,err_arr[i]);
+    end;
+ writeln(f,'err_eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,calc_err(t_upr,err_arr[i],dt,n));
+    end;
+ {График 3}
 
-
-writeln(f,'Ошибка от числа засечек');
-{Ошибка от числа засечек}
+{График 4}
+n:=10;
+t_upr:=0.7;
 eps:=DAHOP();
-t_upr:=1;
-for i:=2 to 100 do
-begin
-for j:=0 to i do
-begin
-   time_zas[j]:=j;
-   x_zas[j]:=x_exact(j)+eps;
-end;
-MNK(x_zas,time_zas,solution);
-err_num[i-2]:=abs(x_exact(i+t_upr)-x_predict(solution[0],solution[1],i+t_upr));
+dt:=0;
+writeln(f,'dt');
+for i:=3 to 10 do
+    begin
+        dt:=dt+0.5;
+        dt_arr[i]:=dt;
+        writeln(f,dt_arr[i]);
+    end;
+writeln(f,'err_dt');
+for i:=3 to 10 do
+    begin
 
-writeln(f,i);
-end;
-writeln(f,'Ошибка от числа засечек при eps=',eps,'t_upr',t_upr);
-for i:=0 to 100-3 do
-begin
-writeln(f,err_num[i]);
-end;
+        writeln(f,calc_err(t_upr,eps,dt_arr[i],n));
+    end;
+{График 4}
 close(f);
+
 end.
