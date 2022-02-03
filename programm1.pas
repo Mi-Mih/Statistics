@@ -110,12 +110,6 @@ begin
      coord[i]:=(20+45*time[i])+E;
 end;
 
-for i:=0 to n do
-begin
-     time[i]:=i*dt;
-     coord[i]:=(20+45*time[i])+E;
- end;
-
     prediction:=MNK(coord,time,coord[n+1]+t_upr);
     err:=abs(20+45*(coord[n+1]+t_upr)-prediction);
 
