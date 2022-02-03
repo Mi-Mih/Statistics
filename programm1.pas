@@ -35,7 +35,7 @@ Function power (os: real; st: integer):real;
                       end;   {Powd}
  {нормальный датчик (0,1) }
                  Function DAHOP(): real;
-                     {   Var
+                        Var
                      i    : byte;
                      a,aa : real;
                        begin
@@ -46,15 +46,15 @@ Function power (os: real; st: integer):real;
                              a:=a+aa;
                            end;
                          Dahop:=(a-6)/0.6745;
-                       end;  }
-                   var
+                       end;
+                   {var
                    ra:real;
                    begin
                    ra:=abs(exp((-1/2)*(power(random,2)))/sqrt(2*pi));
-                   end;
+                   end; }
 
 {фунция МНК, прямая}
-function MNK(var coord,time,solution: array of real): boolean;
+function MNK(var coord,time: array of real; input:real): real;
       var
       {index массива}
          i : integer ;
@@ -68,6 +68,7 @@ function MNK(var coord,time,solution: array of real): boolean;
          {Искомые коэффициенты}
          b_0:real;
          b_1:real;
+         output:real;
       begin
          sum_coord:=0;
          sum_t:=0;
@@ -89,10 +90,7 @@ function MNK(var coord,time,solution: array of real): boolean;
       b_0:=(sum_coord*sum_t_2-sum_t*sum_coord_t)/(n*sum_t_2-power(sum_t,2));
       {b_1}
       b_1:=(n*sum_coord_t-sum_t*sum_coord)/(n*sum_t_2-power(sum_t,2));
-
-      {то, что возвращаем: массив найденных коэффов}
-      solution[0]:=b_0;
-      solution[1]:=b_1;
+      output:=b_0+b_1*input;
 end;
 
 
@@ -100,21 +98,27 @@ Function calc_err(t_upr,E,dt:real; n:integer):real; {функция расчёт
 var
    coord, time: array of real;
    i: integer;
-   solution:array [0..1] of real;
-   err:real;
+   err,prediction:real;
 
 begin
   setlength(coord,n+2);
   setlength(time,n+2);
- for i:=0 to n do
- begin
+
+for i:=0 to n do
+begin
      time[i]:=i*dt;
+     coord[i]:=(20+45*time[i])+E;
+end;
 
-     coord[i]:=20+45*time[i]+E;
+for i:=0 to n do
+begin
+     time[i]:=i*dt;
+     coord[i]:=(20+45*time[i])+E;
+ end;
 
-     end;
-    MNK(coord,time,solution);
-    err:=abs(20+45*(n*dt+t_upr)-(solution[0]+solution[1]*(n*dt+t_upr)));
+    prediction:=MNK(coord,time,coord[n+1]+t_upr);
+    err:=abs(20+45*(coord[n+1]+t_upr)-prediction);
+
 end;{функция расчёта ошибки}
 
 begin {Главная часть программы}
@@ -131,7 +135,7 @@ for i:=0 to 10 do
     end;
 writeln(f,'err_t_upr');
 eps:=DAHOP();
-n:=10;
+n:=5;
 dt:=1.0;
 for i:=0 to 10 do
     begin
@@ -156,7 +160,7 @@ for i:=3 to 15 do
 {График 2}
 
 {График 3}
-n:=10;
+n:=5;
 t_upr:=10;
 dt:=1;
 writeln(f,'eps');
@@ -174,8 +178,8 @@ writeln(f,'eps');
  {График 3}
 
 {График 4}
-n:=10;
-t_upr:=0.7;
+n:=5;
+t_upr:=4;
 eps:=DAHOP();
 dt:=0;
 writeln(f,'dt');
@@ -193,5 +197,4 @@ for i:=3 to 10 do
     end;
 {График 4}
 close(f);
-
-end.
+end.                                
