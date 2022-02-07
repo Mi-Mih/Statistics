@@ -166,6 +166,8 @@ rewrite(f);
 {Запись в файл}
 
 writeln(f,'FOR X');
+eps:=DAHOP();
+writeln(f,'eps=',eps);
 {Графики для x}
 {График 1}
 writeln(f,'t_upr');
@@ -174,8 +176,6 @@ for i:=2 to 17 do
         writeln(f,i);
     end;
 writeln(f,'err_t_upr');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 n:=10;
 dt:=1.0;
 for i:=2 to 17 do
@@ -191,8 +191,6 @@ for i:=3 to 15 do
         writeln(f,i);
     end;
 writeln(f,'err_n');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 t_upr:=6.0;
 dt:=1.0;
 for i:=3 to 15 do
@@ -222,8 +220,6 @@ writeln(f,'eps');
 {График 4}
 n:=10;
 t_upr:=6.0;
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 dt:=0;
 writeln(f,'dt');
 for i:=3 to 10 do
@@ -249,8 +245,6 @@ for i:=2 to 17 do
         writeln(f,i);
     end;
 writeln(f,'err_t_upr');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 n:=10;
 dt:=1.0;
 for i:=2 to 17 do
@@ -266,8 +260,6 @@ for i:=3 to 15 do
         writeln(f,i);
     end;
 writeln(f,'err_n');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 t_upr:=6.0;
 dt:=1.0;
 for i:=3 to 15 do
@@ -297,8 +289,6 @@ writeln(f,'eps');
 {График 4}
 n:=10;
 t_upr:=6.0;
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 dt:=0;
 writeln(f,'dt');
 for i:=3 to 10 do
@@ -324,8 +314,6 @@ for i:=2 to 17 do
         writeln(f,i);
     end;
 writeln(f,'err_t_upr');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 n:=10;
 dt:=1.0;
 for i:=2 to 17 do
@@ -341,8 +329,6 @@ for i:=3 to 15 do
         writeln(f,i);
     end;
 writeln(f,'err_n');
-eps:=DAHOP();
-writeln(f,'eps=',eps);
 t_upr:=6.0;
 dt:=1.0;
 for i:=3 to 15 do
@@ -371,9 +357,7 @@ writeln(f,'eps');
 
 {График 4}
 n:=10;
-t_upr:=6;
-eps:=DAHOP();
-writeln(f,'eps=',eps);
+t_upr:=6.0;
 dt:=0;
 writeln(f,'dt');
 for i:=3 to 10 do
@@ -391,4 +375,4 @@ for i:=3 to 10 do
 {График 4}
 
 close(f);
-end.
+end.  
