@@ -104,7 +104,7 @@ begin
   setlength(coord,n+2);
   setlength(time,n+2);
 
-for i:=0 to n do
+for i:=1 to n+1 do
 begin
      time[i]:=i*dt;
      coord[i]:=(20+45*time[i])+E;
@@ -127,7 +127,7 @@ begin
   setlength(coord,n+2);
   setlength(time,n+2);
 
-for i:=0 to n do
+for i:=1 to n+1 do
 begin
      time[i]:=i*dt;
      coord[i]:=(40+25*time[i])+E;
@@ -149,7 +149,7 @@ begin
   setlength(coord,n+2);
   setlength(time,n+2);
 
-for i:=0 to n do
+for i:=1 to n+1 do
 begin
      time[i]:=i*dt;
      coord[i]:=(15+20*time[i])+E;
@@ -373,6 +373,6 @@ for i:=3 to 10 do
         writeln(f,calc_err_z(t_upr,eps,dt_arr[i],n));
     end;
 {График 4}
-
+  { readln();}
 close(f);
-end.  
+end.   
