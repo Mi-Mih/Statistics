@@ -45,7 +45,7 @@ Function power (os: real; st: integer):real;
                              aa:=random;
                              a:=a+aa;
                            end;
-                         Dahop:=(a-6)/0.6745;
+                         Dahop:=(a-6);
                        end;
                    {var
                    ra:real;
@@ -94,7 +94,7 @@ function MNK(var coord,time: array of real; input:real): real;
 end;
 
 
-Function calc_err(t_upr,E,dt:real; n:integer):real; {функция расчёта ошибки}
+Function calc_err_x(t_upr,E,dt:real; n:integer):real; {функция расчёта ошибки по иксу}
 var
    coord, time: array of real;
    i: integer;
@@ -113,27 +113,74 @@ end;
     prediction:=MNK(coord,time,coord[n+1]+t_upr);
     err:=abs(20+45*(coord[n+1]+t_upr)-prediction);
 
-end;{функция расчёта ошибки}
+end;{функция расчёта ошибки по иксу}
 
+
+
+Function calc_err_y(t_upr,E,dt:real; n:integer):real; {функция расчёта ошибки по игреку}
+var
+   coord, time: array of real;
+   i: integer;
+   err,prediction:real;
+
+begin
+  setlength(coord,n+2);
+  setlength(time,n+2);
+
+for i:=0 to n do
+begin
+     time[i]:=i*dt;
+     coord[i]:=(40+25*time[i])+E;
+end;
+
+    prediction:=MNK(coord,time,coord[n+1]+t_upr);
+    err:=abs(40+25*(coord[n+1]+t_upr)-prediction);
+
+end;{функция расчёта ошибки по игреку}
+
+
+Function calc_err_z(t_upr,E,dt:real; n:integer):real; {функция расчёта ошибки по z}
+var
+   coord, time: array of real;
+   i: integer;
+   err,prediction:real;
+
+begin
+  setlength(coord,n+2);
+  setlength(time,n+2);
+
+for i:=0 to n do
+begin
+     time[i]:=i*dt;
+     coord[i]:=(15+20*time[i])+E;
+end;
+
+    prediction:=MNK(coord,time,coord[n+1]+t_upr);
+    err:=abs(15+20*(coord[n+1]+t_upr)-prediction);
+
+end;{функция расчёта ошибки по z}
 begin {Главная часть программы}
 {Запись в файл}
 assign(f,'data.csv');
 rewrite(f);
 {Запись в файл}
 
+writeln(f,'FOR X');
+{Графики для x}
 {График 1}
 writeln(f,'t_upr');
-for i:=0 to 10 do
+for i:=2 to 17 do
     begin
         writeln(f,i);
     end;
 writeln(f,'err_t_upr');
 eps:=DAHOP();
-n:=5;
+writeln(f,'eps=',eps);
+n:=10;
 dt:=1.0;
-for i:=0 to 10 do
+for i:=2 to 17 do
     begin
-        writeln(f,calc_err(i,eps,dt, n));
+        writeln(f,calc_err_x(i,eps,dt, n));
     end;
 {График 1}
 
@@ -145,18 +192,19 @@ for i:=3 to 15 do
     end;
 writeln(f,'err_n');
 eps:=DAHOP();
-t_upr:=10;
-dt:=1;
+writeln(f,'eps=',eps);
+t_upr:=6.0;
+dt:=1.0;
 for i:=3 to 15 do
     begin
-        writeln(f,calc_err(t_upr,eps,(10-0)/i,i));
+        writeln(f,calc_err_x(t_upr,eps,(10-0)/i,i));
     end;
 {График 2}
 
 {График 3}
-n:=5;
-t_upr:=10;
-dt:=1;
+n:=10;
+t_upr:=6.0;
+dt:=1.0;
 writeln(f,'eps');
  for i:=3 to 15 do
     begin
@@ -167,14 +215,15 @@ writeln(f,'eps');
  for i:=3 to 15 do
     begin
         err_arr[i]:=DAHOP();
-        writeln(f,calc_err(t_upr,err_arr[i],dt,n));
+        writeln(f,calc_err_x(t_upr,err_arr[i],dt,n));
     end;
  {График 3}
 
 {График 4}
-n:=5;
-t_upr:=4;
+n:=10;
+t_upr:=6.0;
 eps:=DAHOP();
+writeln(f,'eps=',eps);
 dt:=0;
 writeln(f,'dt');
 for i:=3 to 10 do
@@ -187,8 +236,159 @@ writeln(f,'err_dt');
 for i:=3 to 10 do
     begin
 
-        writeln(f,calc_err(t_upr,eps,dt_arr[i],n));
+        writeln(f,calc_err_x(t_upr,eps,dt_arr[i],n));
     end;
 {График 4}
+
+{Графики для y}
+writeln(f,'FOR Y');
+{График 1}
+writeln(f,'t_upr');
+for i:=2 to 17 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_t_upr');
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+n:=10;
+dt:=1.0;
+for i:=2 to 17 do
+    begin
+        writeln(f,calc_err_y(i,eps,dt, n));
+    end;
+{График 1}
+
+{График 2}
+writeln(f,'n');
+for i:=3 to 15 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_n');
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+t_upr:=6.0;
+dt:=1.0;
+for i:=3 to 15 do
+    begin
+        writeln(f,calc_err_y(t_upr,eps,(10-0)/i,i));
+    end;
+{График 2}
+
+{График 3}
+n:=10;
+t_upr:=6.0;
+dt:=1.0;
+writeln(f,'eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,err_arr[i]);
+    end;
+ writeln(f,'err_eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,calc_err_y(t_upr,err_arr[i],dt,n));
+    end;
+ {График 3}
+
+{График 4}
+n:=10;
+t_upr:=6.0;
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+dt:=0;
+writeln(f,'dt');
+for i:=3 to 10 do
+    begin
+        dt:=dt+0.5;
+        dt_arr[i]:=dt;
+        writeln(f,dt_arr[i]);
+    end;
+writeln(f,'err_dt');
+for i:=3 to 10 do
+    begin
+
+        writeln(f,calc_err_y(t_upr,eps,dt_arr[i],n));
+    end;
+{График 4}
+
+{Графики для Z}
+writeln(f,'FOR Z');
+{График 1}
+writeln(f,'t_upr');
+for i:=2 to 17 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_t_upr');
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+n:=10;
+dt:=1.0;
+for i:=2 to 17 do
+    begin
+        writeln(f,calc_err_z(i,eps,dt, n));
+    end;
+{График 1}
+
+{График 2}
+writeln(f,'n');
+for i:=3 to 15 do
+    begin
+        writeln(f,i);
+    end;
+writeln(f,'err_n');
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+t_upr:=6.0;
+dt:=1.0;
+for i:=3 to 15 do
+    begin
+        writeln(f,calc_err_z(t_upr,eps,(10-0)/i,i));
+    end;
+{График 2}
+
+{График 3}
+n:=10;
+t_upr:=6;
+dt:=1;
+writeln(f,'eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,err_arr[i]);
+    end;
+ writeln(f,'err_eps');
+ for i:=3 to 15 do
+    begin
+        err_arr[i]:=DAHOP();
+        writeln(f,calc_err_z(t_upr,err_arr[i],dt,n));
+    end;
+ {График 3}
+
+{График 4}
+n:=10;
+t_upr:=6;
+eps:=DAHOP();
+writeln(f,'eps=',eps);
+dt:=0;
+writeln(f,'dt');
+for i:=3 to 10 do
+    begin
+        dt:=dt+0.5;
+        dt_arr[i]:=dt;
+        writeln(f,dt_arr[i]);
+    end;
+writeln(f,'err_dt');
+for i:=3 to 10 do
+    begin
+
+        writeln(f,calc_err_z(t_upr,eps,dt_arr[i],n));
+    end;
+{График 4}
+
 close(f);
-end.                                
+end.
