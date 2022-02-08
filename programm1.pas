@@ -1,9 +1,9 @@
 program matstat;
 
 var
-    err_arr: array[0..15-3] of real;
-    dt_arr:array[0..10-3] of real;
-    eps, t_upr,dt:real;
+    err_arr: array[0..10] of real;
+    dt_arr:array[0..10] of real;
+    eps,help, t_upr,dt:real;
 
    i,n:integer;
 
@@ -203,16 +203,17 @@ for i:=3 to 15 do
 n:=10;
 t_upr:=6.0;
 dt:=1.0;
+help:=0.0;
 writeln(f,'eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
+        help:=help+0.5;
+        err_arr[i]:=help;
         writeln(f,err_arr[i]);
     end;
  writeln(f,'err_eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
         writeln(f,calc_err_x(t_upr,err_arr[i],dt,n));
     end;
  {График 3}
@@ -222,14 +223,14 @@ n:=10;
 t_upr:=6.0;
 dt:=0;
 writeln(f,'dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
         dt:=dt+0.5;
         dt_arr[i]:=dt;
         writeln(f,dt_arr[i]);
     end;
 writeln(f,'err_dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
 
         writeln(f,calc_err_x(t_upr,eps,dt_arr[i],n));
@@ -268,20 +269,20 @@ for i:=3 to 15 do
     end;
 {График 2}
 
-{График 3}
 n:=10;
 t_upr:=6.0;
 dt:=1.0;
+help:=0.0;
 writeln(f,'eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
+        help:=help+0.5;
+        err_arr[i]:=help;
         writeln(f,err_arr[i]);
     end;
  writeln(f,'err_eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
         writeln(f,calc_err_y(t_upr,err_arr[i],dt,n));
     end;
  {График 3}
@@ -291,19 +292,20 @@ n:=10;
 t_upr:=6.0;
 dt:=0;
 writeln(f,'dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
         dt:=dt+0.5;
         dt_arr[i]:=dt;
         writeln(f,dt_arr[i]);
     end;
 writeln(f,'err_dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
 
         writeln(f,calc_err_y(t_upr,eps,dt_arr[i],n));
     end;
 {График 4}
+
 
 {Графики для Z}
 writeln(f,'FOR Z');
@@ -337,20 +339,20 @@ for i:=3 to 15 do
     end;
 {График 2}
 
-{График 3}
 n:=10;
-t_upr:=6;
-dt:=1;
+t_upr:=6.0;
+dt:=1.0;
+help:=0.0;
 writeln(f,'eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
+        help:=help+0.5;
+        err_arr[i]:=help;
         writeln(f,err_arr[i]);
     end;
  writeln(f,'err_eps');
- for i:=3 to 15 do
+ for i:=0 to 10 do
     begin
-        err_arr[i]:=DAHOP();
         writeln(f,calc_err_z(t_upr,err_arr[i],dt,n));
     end;
  {График 3}
@@ -360,19 +362,20 @@ n:=10;
 t_upr:=6.0;
 dt:=0;
 writeln(f,'dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
         dt:=dt+0.5;
         dt_arr[i]:=dt;
         writeln(f,dt_arr[i]);
     end;
 writeln(f,'err_dt');
-for i:=3 to 10 do
+for i:=0 to 10 do
     begin
 
         writeln(f,calc_err_z(t_upr,eps,dt_arr[i],n));
     end;
 {График 4}
+
   { readln();}
 close(f);
-end.   
+end.                                 
