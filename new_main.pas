@@ -109,7 +109,11 @@ end;
       b_1:=(n*sum_coord_t-sum_t*sum_coord)/(n*sum_t_2-power(sum_t,2));
       {output=b_0+b_1*x}
        output:=b_0+b_1*(coord[n-1]+t_upr);
-
+for i:=0 to n-1 do
+    begin
+      time[i]:=i*dt;
+      coord[i]:=input_b0+input_b1*i*dt; {точное зн-е + ошибка}
+       end;
 
 {ищем ошибку = точное - полученное}
     error:=abs((input_b0+input_b1*(coord[n-1]+t_upr))-output);
@@ -132,5 +136,6 @@ input_b0:=20.0;
 input_b1:=45.0;
 n:=10;
 err:=calc_err_x(coord,time,t_upr,E,dt,input_b0,input_b1,n);
+
 readln();
-end.  
+end.
