@@ -58,27 +58,42 @@ Function power (os: real; st: integer):real;
                        end;
 
 
-{фунция МНК, прямая}
-function MNK(var coord,time: array of real; input:real; k:integer): real;
-      var
-      {index массива}
+
+{функция расчёта ошибки по иксу}
+{принимает на вход массивы x и t, t_upr, среднюю ошибку, коэффициенты b0 и b1, n - число засечек}
+Function calc_err_x(var coord,time: array of real; t_upr,E,dt,input_b0,input_b1:real;  n:integer):real;
+var
+
+   {err-искомая ошибка, prediction - предиктовое зн-е}
+   error, output:real;
+   {MNK}
+        {index массива}
          i : integer ;
          {размер массива}
-         n: integer;
+         k: integer;
          {вспомогательные массивы сумм для МНК}
          sum_coord, sum_t, sum_t_2, sum_coord_t:real;
          {Искомые коэффициенты}
          b_0, b_1:real;
-         {предиктовое зн-е}
-         output:real;
-      begin
+
+begin
+{Заполняем массивы координаты и времени}
+for i:=0 to n-1 do
+begin
+     time[i]:=i*dt;
+     coord[i]:=(input_b0+input_b1*i*dt)+E*DAHOP(); {точное зн-е + ошибка}
+end;
+
+{Заполняем массивы координаты и времени}
+
+{MNK}
          sum_coord:=0;
          sum_t:=0;
          sum_t_2:=0;
          sum_coord_t:=0;
       {размер берём по массиву времени}
 
-             n:=Length(time);
+
       {ищем прямую y=b_0+b_1*x}
       {считаем необходимые суммы: sum(coord), sum(t^2),sum(t),sum(coord*t)}
       for i:=0 to n-1 do
@@ -93,34 +108,12 @@ function MNK(var coord,time: array of real; input:real; k:integer): real;
       {b_1}
       b_1:=(n*sum_coord_t-sum_t*sum_coord)/(n*sum_t_2-power(sum_t,2));
       {output=b_0+b_1*x}
-      output:=b_0+b_1*input;
+       output:=b_0+b_1*(coord[n-1]+t_upr);
 
-end;
-
-{функция расчёта ошибки по иксу}
-{принимает на вход массивы x и t, t_upr, среднюю ошибку, коэффициенты b0 и b1, n - число засечек}
-Function calc_err_x(var coord,time: array of real; t_upr,E,dt,input_b0,input_b1:real;  n:integer):real;
-var
-   i: integer;
-   {err-искомая ошибка, prediction - предиктовое зн-е}
-   error, prediction:real;
-
-begin
-
-{Заполняем массивы координаты и времени}
-for i:=0 to n-1 do
-begin
-     time[i]:=i*dt;
-     coord[i]:=(input_b0+input_b1*i*dt)+E*DAHOP(); {точное зн-е + ошибка}
-end;
-
-{Заполняем массивы координаты и времени}
-
-{Ищем предиктовое зн-е}
-    prediction:=MNK(coord,time,(coord[n-1]+t_upr),n);
 
 {ищем ошибку = точное - полученное}
-    error:=abs((input_b0+input_b1*(coord[n-1]+t_upr))-prediction);
+    error:=abs((input_b0+input_b1*(coord[n-1]+t_upr))-output);
+
 end;
 {функция расчёта ошибки по иксу}
 
@@ -139,7 +132,5 @@ input_b0:=20.0;
 input_b1:=45.0;
 n:=10;
 err:=calc_err_x(coord,time,t_upr,E,dt,input_b0,input_b1,n);
-
 readln();
-
-end. 
+end.  
