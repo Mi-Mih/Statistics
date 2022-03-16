@@ -1,6 +1,4 @@
 program matstat;
-
-
 {Переменные}
 var
     {массив координаты - coord
@@ -145,45 +143,45 @@ end;
 {ФУНКЦИЯ РАСЧЁТА ПРЕДИКТОВОЙ ТОЧКИ}
 
 {фУНКЦИЯ РАСЧЁТА МАТ ОЖИДАНИЯ}
-Function calc_mat_expect(var data: array of real; k: integer): real;
-var 
+Function calc_mat_expect(var data: array of real): real;
+var
     i: integer;
     mat_expect: real;
 begin
     mat_expect := 0;
-    for i := 0 to k-1 do
+    for i := 0 to Length(data)-1 do
     begin
-    mat_expect := mat_expect + data[i] / k;
+    mat_expect := mat_expect + data[i] / Length(data);
     end;
 end;
 {ФУНКЦИЯ РАСЧЁТА МАТ ОЖИДАНИЯ}
 
 {ФУНКЦИЯ РАСЧЁТА ДИСПЕРСИИ}
-function calc_dispersion(var data: array of real; k: integer): real;
-var 
+function calc_dispersion(var data: array of real): real;
+var
     i: integer;
     mat_expect, dispersion: real;
 begin
-    mat_expect := calc_mat_expect(data,k);
-    for i := 0 to k-1 do
+    mat_expect := calc_mat_expect(data);
+    for i := 0 to Length(data)-1 do
     begin
-        dispersion := power((data[i] - mat_expect), 2) / (k - 1);
+        dispersion := power((data[i] - mat_expect), 2) / (Length(data) - 1);
     end;
     dispersion := Powd(dispersion,1/2);
 end;
 {ФУНКЦИЯ РАСЧЁТА ДИСПЕРСИИ}
 
 {ФУНКЦИЯ РАСЧЁТА СРЕДНЕГО КВАДРАТИЧНОГО ОТКЛОНЕНИЯ}
-function calc_average_quadr_diff(var data: array of real; k: integer): real;
+function calc_average_quadr_diff(var data: array of real): real;
 var
     i: integer;
     quadr_diff,mat_expect: real;
 begin
-  mat_expect:=calc_mat_expect(data,k);
+  mat_expect:=calc_mat_expect(data);
   quadr_diff:=0;
- for i:=0 to k-1 do
+ for i:=0 to Length(data)-1 do
    begin
-   quadr_diff:=quadr_diff + ((1/k*(k-1)) * (data[i]-mat_expect)*(data[i]-mat_expect));
+   quadr_diff:=quadr_diff + ((1/Length(data)*(Length(data)-1)) * (data[i]-mat_expect)*(data[i]-mat_expect));
    end;
 end;
 {ФУНКЦИЯ РАСЧЁТА СРЕДНЕГО КВАДРАТИЧНОГО ОТКЛОНЕНИЯ}
@@ -203,7 +201,7 @@ b0_y:=25.0;
 b1_y:=45.0;
 
 n:=10;
-error:=predict_coord(coord, time, t_upr, E, dt, b0_x,b1_x, n);
+error:=predict_coord(coord, time, t_upr, E, dt, b0_y,b1_y, n);
 
 predict_point(x_y_z,t_upr,E,dt, n);
 
@@ -211,4 +209,4 @@ writeln(x_y_z[1]);
 writeln(error);
 readln();
 end.
-{ГЛАВНАЯ ЧАСТЬ ПРОГРАММЫ}  
+{ГЛАВНАЯ ЧАСТЬ ПРОГРАММЫ} 
