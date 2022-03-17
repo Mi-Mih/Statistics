@@ -1,6 +1,10 @@
 program matstat;
+
 {Переменные}
 var
+     {массив, куда будет записываться ошибка - error_arr}
+     error_arr: array[1..1000] of real;
+
     {массив координаты - coord
      массив времени - time}
     coord,time: array[0..1000] of real;
@@ -9,9 +13,9 @@ var
     {средняя ошибка - E
     время упреждения - t_upr
     шаг по времени - dt
-    левая граница координатного отрезка - left_border_x
-    правая граница координатного отрезка - rigth border_x}
-    E, t_upr, dt, left_border_x, right_border_x:real;
+    левая граница координатного отрезка по времени - left_border_t
+    правая граница координатного отрезка по времени - rigth border_t}
+    E, t_upr, dt, left_border_t, right_border_t:real;
 
     {расчитываемая ошибка - error
      траектория прямая coord=b_0+b_1*t
@@ -21,8 +25,10 @@ var
     {индекс для циклов по массивам - i
     число засечек - n}
     i,n:integer;
-    {Текстовая переменная для записи в файл - f}
-    f:text;
+    {mato -мат ожидание
+     dispersion -дисперсия
+     quadr_dif - среднее квадратичное отклонение}
+     mato,dispers,quadr_otkl:real;
 
 {функции power}
 Function power (os: real; st: integer):real;
@@ -79,7 +85,7 @@ Function predict_coord(var coord,time: array of real; t_upr,E,dt,input_b0,input_
 var
 
    {error- искомая ошибка, prediction - предиктовое зн-е}
-   error, prediction:real;
+   prediction:real;
    {переменные, необходимые для МНК}
         {индекс для циклов по массивам - i}
          i : integer ;
@@ -162,12 +168,13 @@ var
     i: integer;
     mat_expect, dispersion: real;
 begin
+    dispersion:=0;
     mat_expect := calc_mat_expect(data);
     for i := 0 to Length(data)-1 do
     begin
-        dispersion := power((data[i] - mat_expect), 2) / (Length(data) - 1);
+        dispersion := dispersion + power(data[i] - mat_expect, 2) / (Length(data)-1);
     end;
-    dispersion := Powd(dispersion,1/2);
+
 end;
 {ФУНКЦИЯ РАСЧЁТА ДИСПЕРСИИ}
 
@@ -175,38 +182,162 @@ end;
 function calc_average_quadr_diff(var data: array of real): real;
 var
     i: integer;
-    quadr_diff,mat_expect: real;
+    mat_expect, dispersion,quadr_diff: real;
 begin
-  mat_expect:=calc_mat_expect(data);
-  quadr_diff:=0;
- for i:=0 to Length(data)-1 do
-   begin
-   quadr_diff:=quadr_diff + ((1/Length(data)*(Length(data)-1)) * (data[i]-mat_expect)*(data[i]-mat_expect));
-   end;
+    dispersion:=0;
+    quadr_diff:=0;
+    mat_expect := calc_mat_expect(data);
+    for i := 0 to Length(data)-1 do
+    begin
+        dispersion := dispersion + power((data[i] - mat_expect), 2) / (Length(data)-1);
+    end;
+    quadr_diff:=Powd(dispersion,1/2);
 end;
 {ФУНКЦИЯ РАСЧЁТА СРЕДНЕГО КВАДРАТИЧНОГО ОТКЛОНЕНИЯ}
 
+{ФУНКЦИЯ РАСЧЁТА ОШИБКА}
+Function calc_error(var x_y_z:array of real;t_upr,E,dt:real;n:integer):real;
+var
+    x,y,z,pred_vec,exact_vec:real;
+begin
+ x:=b0_x+b1_x*(dt*(n-1)+t_upr);
+ y:=b0_y+b1_y*(dt*(n-1)+t_upr);
+ z:=b0_z+b1_z*(dt*(n-1)+t_upr);
 
-{error:=abs((input_b0+input_b1*((n-1)*dt+t_upr))-prediction);}
+ predict_point(x_y_z,t_upr,E,dt, n);
+ pred_vec:=Powd(power(x_y_z[0],2)+power(x_y_z[1],2)+power(x_y_z[2],2),1/2);
+
+ exact_vec:=Powd(power(x,2)+power(y,2)+power(z,2),1/2);
+ error:=abs(pred_vec-exact_vec);
+end;
+{ФУНКЦИЯ РАСЧЁТА ОШИБКА}
+
 
 begin {ГЛАВНАЯ ЧАСТЬ ПРОГРАММЫ}
-{Запись в файл}
-assign(f,'data.csv');
-rewrite(f);
-
-t_upr:=0.0;
-E:=0.0;
-dt:=1.0;
+{Вводим коэффициенты, определяющие траекторию полёта цели
+для прямой coord=b0+b1*t}
+b0_x:=25.0;
+b1_x:=45.0;
 b0_y:=25.0;
 b1_y:=45.0;
+b0_z:=25.0;
+b1_z:=45.0;
+{Вводим коэффициенты, определяющие траекторию полёта цели
+для прямой coord=b0+b1*t}
 
+{Вводим границы временного отрезка}
+left_border_t:=0;
+right_border_t:=10;
+{Вводим границы временного отрезка}
+
+
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ ЧИСЛА ЗАСЕЧЕК - n}
+{Фикс параметры}
+t_upr:=0.0;
+E:=0.0;
+{Фикс параметры}
+
+{Расчёт ошибки}
+for i:=2 to Length(error_arr) do
+begin
+     error_arr[i-1]:=calc_error(x_y_z,t_upr,E,(left_border_t - right_border_t)/i,i);
+end;
+{Расчёт ошибки}
+
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+mato:=calc_mat_expect(error_arr);
+
+dispers:= calc_dispersion(error_arr);
+
+quadr_otkl:=calc_average_quadr_diff(error_arr);
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+
+writeln('Mathematical expected ',mato);
+writeln('Dispersion ',dispers);
+writeln('Average quadratic deviation ',quadr_otkl);
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ ЧИСЛА ЗАСЕЧЕК - n}
+
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ ВРЕМЕНИ УПРЕЖДЕНИЯ - t_upr}
+{Фикс параметры}
+E:=0.0;
+dt:=1.0;
 n:=10;
-error:=predict_coord(coord, time, t_upr, E, dt, b0_y,b1_y, n);
+{Фикс параметры}
 
-predict_point(x_y_z,t_upr,E,dt, n);
+{Расчёт ошибки}
+for i:=1 to Length(error_arr)-1 do
+begin
+     error_arr[i]:=calc_error(x_y_z,i/100,E,dt,n);
+end;
+{Расчёт ошибки}
 
-writeln(x_y_z[1]);
-writeln(error);
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+mato:=calc_mat_expect(error_arr);
+
+dispers:= calc_dispersion(error_arr);
+
+quadr_otkl:=calc_average_quadr_diff(error_arr);
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+
+writeln('Mathematical expected ',mato);
+writeln('Dispersion ',dispers);
+writeln('Average quadratic deviation ',quadr_otkl);
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ ВРЕМЕНИ УПРЕЖДЕНИЯ - t_upr}
+
+
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ СРЕДИННОЙ ОШИБКИ- E}
+{Фикс параметры}
+t_upr:=0.0;
+dt:=1.0;
+n:=10;
+{Фикс параметры}
+
+{Расчёт ошибки}
+for i:=1 to Length(error_arr)-1 do
+begin
+     error_arr[i]:=calc_error(x_y_z,t_upr,i/100,dt,n);
+end;
+{Расчёт ошибки}
+
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+mato:=calc_mat_expect(error_arr);
+
+dispers:= calc_dispersion(error_arr);
+
+quadr_otkl:=calc_average_quadr_diff(error_arr);
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+
+writeln('Mathematical expected ',mato);
+writeln('Dispersion ',dispers);
+writeln('Average quadratic deviation ',quadr_otkl);
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ СРЕДИННОЙ ОШИБКИ- E}
+
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ величины отрезка(шага по времени)- dt}
+{Фикс параметры}
+t_upr:=0.0;
+E:=0.0;
+n:=10;
+{Фикс параметры}
+
+{Расчёт ошибки}
+for i:=1 to Length(error_arr)-1 do
+begin
+     error_arr[i]:=calc_error(x_y_z,t_upr,E,i/10,n);
+end;
+{Расчёт ошибки}
+
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+mato:=calc_mat_expect(error_arr);
+
+dispers:= calc_dispersion(error_arr);
+
+quadr_otkl:=calc_average_quadr_diff(error_arr);
+{Расчёт параметров мат ожидания, дисперсии, ср кв отклонения}
+
+writeln('Mathematical expected ',mato);
+writeln('Dispersion ',dispers);
+writeln('Average quadratic deviation ',quadr_otkl);
+{РАСЧЁТ ПАРАМЕТРОВ ОШИБКИ ПРИ ИЗМЕНЕНИИ величины отрезка(шага по времени)- dt}
 readln();
 end.
 {ГЛАВНАЯ ЧАСТЬ ПРОГРАММЫ} 
