@@ -195,7 +195,7 @@ begin
 end;
 {ФУНКЦИЯ РАСЧЁТА СРЕДНЕГО КВАДРАТИЧНОГО ОТКЛОНЕНИЯ}
 
-{ФУНКЦИЯ РАСЧЁТА ОШИБКА}
+{ФУНКЦИЯ РАСЧЁТА ОШИБКИ}
 Function calc_error(var x_y_z:array of real;t_upr,E,dt:real;n:integer):real;
 var
     x,y,z,pred_vec,exact_vec:real;
@@ -210,7 +210,7 @@ begin
  exact_vec:=Powd(power(x,2)+power(y,2)+power(z,2),1/2);
  error:=abs(pred_vec-exact_vec);
 end;
-{ФУНКЦИЯ РАСЧЁТА ОШИБКА}
+{ФУНКЦИЯ РАСЧЁТА ОШИБКИ}
 
 
 begin {ГЛАВНАЯ ЧАСТЬ ПРОГРАММЫ}
